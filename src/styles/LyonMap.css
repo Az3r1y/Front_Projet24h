@@ -1,0 +1,215 @@
+.lyon-map-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.map-interactive {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
+.lyon-map-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.district-clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.district-clickable:hover {
+  transform: translateY(-2px);
+}
+
+.district-area {
+  transition: all 0.3s;
+}
+
+.district-area:hover {
+  filter: brightness(1.05);
+}
+
+.district-area.selected {
+  stroke: #2C3E50;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+}
+
+.river {
+  transition: all 0.3s;
+}
+
+.alert-indicator {
+  filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.5));
+  animation: pulse 0s infinite;
+}
+
+/* Panel d'informations sur l'arrondissement */
+.district-info-panel {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-top: 20px;
+  position: relative;
+  animation: fadeIn 0.3s ease-in forwards;
+}
+
+.info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.info-header h3 {
+  margin: 0;
+  color: var(--primary-color, #3498db);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #888;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.info-description {
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.info-details {
+  margin-bottom: 15px;
+}
+
+.attractions ul {
+  padding-left: 20px;
+  margin-top: 5px;
+}
+
+.attractions li {
+  margin-bottom: 5px;
+}
+
+.district-alerts {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 15px;
+}
+
+.district-alerts h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.alert-item-mini {
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.alert-item-mini:last-child {
+  margin-bottom: 0;
+}
+
+.alert-severe {
+  background-color: rgba(231, 76, 60, 0.1);
+  border-left: 3px solid #e74c3c;
+}
+
+.alert-moderate {
+  background-color: rgba(243, 156, 18, 0.1);
+  border-left: 3px solid #f39c12;
+}
+
+.alert-light {
+  background-color: rgba(52, 152, 219, 0.1);
+  border-left: 3px solid #3498db;
+}
+
+.alert-warning {
+  background-color: rgba(241, 196, 15, 0.1);
+  border-left: 3px solid #f1c40f;
+}
+
+/* Légende de la carte */
+.map-legend {
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.map-legend h4 {
+  margin-bottom: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.legend-text {
+  vertical-align: middle;
+  padding-left: 5px;
+}
+
+/* Assurer l'alignement vertical */
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.legend-line {
+  width: 24px;
+  height: 6px;
+  border-radius: 2px;
+  margin-right: 20px; /* Espacement égal à celui des emojis */
+  display: inline-block;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
