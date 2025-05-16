@@ -151,11 +151,33 @@
   border-left: 3px solid #f1c40f;
 }
 
-/* Légende de la carte */
-.map-legend {
-  margin-top: 20px;
-  border-top: 1px solid #eee;
-  padding-top: 15px;
+.legend-emoji {
+  font-size: 1.2rem;
+  margin-right: 20px; /* Augmenté de 10px à 20px */
+  display: inline-block;
+  width: 24px;
+  text-align: center;
+}
+
+/* Appliquer un style cohérent pour tous les éléments de texte de la légende */
+.legend-text {
+  vertical-align: middle;
+  padding-left: 5px;
+}
+
+/* Assurer l'alignement vertical */
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.legend-line {
+  width: 24px;
+  height: 6px;
+  border-radius: 2px;
+  margin-right: 20px; /* Espacement égal à celui des emojis */
+  display: inline-block;
 }
 
 .map-legend h4 {
@@ -212,4 +234,135 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+/* Styles existants... */
+
+/* Styles pour le mode ajout d'alerte */
+.map-controls {
+  margin-bottom: 15px;
+}
+
+.add-alert-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.add-alert-btn.active {
+  background-color: #e74c3c;
+}
+
+.add-alert-btn:hover {
+  opacity: 0.9;
+}
+
+.add-alert-instructions {
+  background-color: #f8f9fa;
+  padding: 8px;
+  border-radius: 4px;
+  margin-top: 8px;
+  font-style: italic;
+  color: #555;
+}
+
+.district-clickable.adding-alert path:hover {
+  cursor: pointer;
+  fill-opacity: 0.7;
+  stroke-width: 2.5;
+  stroke: #e74c3c;
+}
+
+/* Formulaire d'alerte */
+.alert-form-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 16px;
+  margin-top: 16px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.alert-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.alert-form-header h3 {
+  margin: 0;
+}
+
+.alert-form .form-group {
+  margin-bottom: 16px;
+}
+
+.alert-form label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+  color: #333;
+}
+
+.alert-form select,
+.alert-form textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.alert-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.alert-form .cancel-btn {
+  background-color: #f1f2f6;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.alert-form .submit-btn {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Styles pour les niveaux d'alerte */
+.alert-info {
+  border-left: 4px solid #3498db;
+}
+
+.alert-warning {
+  border-left: 4px solid #f39c12;
+}
+
+.alert-danger {
+  border-left: 4px solid #e74c3c;
+}
+
+.alert-critical {
+  border-left: 4px solid #8e44ad;
+  background-color: rgba(142, 68, 173, 0.1);
 }

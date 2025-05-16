@@ -96,29 +96,40 @@ const DISTRICTS_DATA = [
 ];
 
 // Données pour les rivières
-const RIVERS_DATA = [
-//   {
-//     name: "Rhône",
-//     path: "M400,60 C410,100 410,150 405,200 C400,240 390,280 380,340",
-//     color: "#AED6F1", // bleu clair
-//     width: 15
-//   },
-//   {
-//     name: "Saône",
-//     path: "M170,60 C180,100 190,140 210,180 C230,220 250,250 270,280 C290,310 310,340 330,370",
-//     color: "#85C1E9", // bleu un peu plus foncé
-//     width: 12
-//   }
-];
+const RIVERS_DATA = [];
 
-// Icônes pour les types d'alertes (utilisant des emojis)
-const alertIcons = {
-  inondation: "💧",
-  earthquake: "🌋",
-  cyber: "💻",
-  tornado: "🌪️",
-  pollution: "☁️",
-  default: "⚠️"
+// SVG logos pour les types d'alertes
+const AlertIcons = {
+  inondation: ({ width = 24, height = 24 }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="#3498db">
+      <path d="M12,20C8.69,20 6,17.31 6,14C6,10 12,3.25 12,3.25C12,3.25 18,10 18,14C18,17.31 15.31,20 12,20Z" />
+    </svg>
+  ),
+  earthquake: ({ width = 24, height = 24 }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="#e74c3c">
+      <path d="M8,18L12,14L16,18L18,12L22,8L16.36,10.35L10.35,16.36L8,22V18M2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12M4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12Z" />
+    </svg>
+  ),
+  cyber: ({ width = 24, height = 24 }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="#9b59b6">
+      <path d="M8,2A1,1 0 0,1 9,3V5H11V3A1,1 0 0,1 12,2A1,1 0 0,1 13,3V5H15V3A1,1 0 0,1 16,2A1,1 0 0,1 17,3V5H19V7H21A1,1 0 0,1 22,8A1,1 0 0,1 21,9H19V11H21A1,1 0 0,1 22,12A1,1 0 0,1 21,13H19V15H21A1,1 0 0,1 22,16A1,1 0 0,1 21,17H19V19A2,2 0 0,1 17,21H7A2,2 0 0,1 5,19V17H3A1,1 0 0,1 2,16A1,1 0 0,1 3,15H5V13H3A1,1 0 0,1 2,12A1,1 0 0,1 3,11H5V9H3A1,1 0 0,1 2,8A1,1 0 0,1 3,7H5V5H7V3A1,1 0 0,1 8,2M7,7V9H9V7H7M11,7V9H13V7H11M15,7V9H17V7H15M7,11V13H9V11H7M11,11V13H13V11H11M15,11V13H17V11H15M7,15V17H9V15H7M11,15V17H13V15H11M15,15V17H17V15H15Z" />
+    </svg>
+  ),
+  tornado: ({ width = 24, height = 24 }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="#7f8c8d">
+      <path d="M4,3H20A1,1 0 0,1 21,4A1,1 0 0,1 20,5H4A1,1 0 0,1 3,4A1,1 0 0,1 4,3M6,7H18A1,1 0 0,1 19,8A1,1 0 0,1 18,9H6A1,1 0 0,1 5,8A1,1 0 0,1 6,7M8,11H16A1,1 0 0,1 17,12A1,1 0 0,1 16,13H8A1,1 0 0,1 7,12A1,1 0 0,1 8,11M10,15H14A1,1 0 0,1 15,16A1,1 0 0,1 14,17H10A1,1 0 0,1 9,16A1,1 0 0,1 10,15M12,19A1,1 0 0,1 13,20A1,1 0 0,1 12,21A1,1 0 0,1 11,20A1,1 0 0,1 12,19Z" />
+    </svg>
+  ),
+  pollution: ({ width = 24, height = 24 }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="#95a5a6">
+      <path d="M3,4H6V8H3V4M7,4H10V8H7V4M11,4H14V8H11V4M15,4H18V8H15V4M3,9H6V13H3V9M7,9H10V13H7V9M11,9H14V13H11V9M15,9H18V13H15V9M3,14H6V18H3V14M7,14H10V18H7V14M11,14H14V18H11V14M15,14H18V18H15V14Z" />
+    </svg>
+  ),
+  default: ({ width = 24, height = 24 }) => (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="#f1c40f">
+      <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
+    </svg>
+  )
 };
 
 // Données pour la légende des types de catastrophes
@@ -130,16 +141,112 @@ const DISASTER_TYPES = [
   { type: "pollution", label: "Pollution" }
 ];
 
-function LyonMap({ onSelectDistrict, alerts = [] }) {
+// Nouveau composant pour le formulaire d'alerte
+function AlertForm({ district, onSubmit, onCancel }) {
+  const [alertData, setAlertData] = useState({
+    type: 'default',
+    description: '',
+    level: 'warning' // niveau par défaut
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setAlertData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit({
+      district: district,
+      type: alertData.type,
+      description: alertData.description,
+      level: alertData.level,
+      timestamp: new Date().toISOString()
+    });
+  };
+
+  return (
+    <div className="alert-form-container">
+      <div className="alert-form-header">
+        <h3>Nouvelle alerte - {district}<sup>{district === 1 ? 'er' : 'ème'}</sup> arrondissement</h3>
+        <button className="close-btn" onClick={onCancel}>×</button>
+      </div>
+      <form onSubmit={handleSubmit} className="alert-form">
+        <div className="form-group">
+          <label htmlFor="alert-type">Type d'alerte:</label>
+          <select 
+            id="alert-type" 
+            name="type" 
+            value={alertData.type} 
+            onChange={handleChange}
+            required
+          >
+            <option value="default">Choisir un type</option>
+            <option value="inondation">Inondation</option>
+            <option value="earthquake">Tremblement de terre</option>
+            <option value="cyber">Attaque informatique</option>
+            <option value="tornado">Tornade</option>
+            <option value="pollution">Pollution</option>
+          </select>
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="alert-description">Description:</label>
+          <textarea 
+            id="alert-description" 
+            name="description" 
+            value={alertData.description} 
+            onChange={handleChange}
+            rows="3"
+            placeholder="Décrivez l'alerte..."
+            required
+          ></textarea>
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="alert-level">Niveau de gravité:</label>
+          <select 
+            id="alert-level" 
+            name="level" 
+            value={alertData.level} 
+            onChange={handleChange}
+            required
+          >
+            <option value="info">Information</option>
+            <option value="warning">Avertissement</option>
+            <option value="danger">Danger</option>
+            <option value="critical">Critique</option>
+          </select>
+        </div>
+        
+        <div className="form-actions">
+          <button type="button" className="cancel-btn" onClick={onCancel}>Annuler</button>
+          <button type="submit" className="submit-btn">Créer l'alerte</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function LyonMap({ onSelectDistrict, alerts = [], onAddAlert }) {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [districtInfo, setDistrictInfo] = useState(null);
+  const [isAddingAlert, setIsAddingAlert] = useState(false);
+  const [showAlertForm, setShowAlertForm] = useState(false);
 
   // Fonction pour gérer le clic sur un arrondissement
   const handleDistrictClick = (district) => {
-    setSelectedDistrict(district.id);
-    setDistrictInfo(district);
-    if (onSelectDistrict) {
-      onSelectDistrict(district.id);
+    if (isAddingAlert) {
+      // Si en mode ajout d'alerte, afficher le formulaire d'alerte
+      setSelectedDistrict(district.id);
+      setShowAlertForm(true);
+    } else {
+      // Comportement normal
+      setSelectedDistrict(district.id);
+      setDistrictInfo(district);
+      if (onSelectDistrict) {
+        onSelectDistrict(district.id);
+      }
     }
   };
 
@@ -151,13 +258,53 @@ function LyonMap({ onSelectDistrict, alerts = [] }) {
     }
   };
 
+  const toggleAddAlertMode = () => {
+    setIsAddingAlert(!isAddingAlert);
+    // Si on quitte le mode ajout, fermer le formulaire s'il est ouvert
+    if (isAddingAlert) {
+      setShowAlertForm(false);
+    }
+  };
+
+  const handleAlertSubmit = (newAlert) => {
+    if (onAddAlert) {
+      onAddAlert(newAlert);
+    }
+    setShowAlertForm(false);
+    setIsAddingAlert(false);
+  };
+
+  const cancelAlertCreation = () => {
+    setShowAlertForm(false);
+  };
+
   // Récupère les alertes pour un arrondissement donné
   const getDistrictAlerts = (districtId) => {
     return alerts.filter(alert => alert.district === districtId);
   };
 
+  // Rendu d'une icône d'alerte
+  const renderAlertIcon = (type, options = {}) => {
+    const IconComponent = AlertIcons[type] || AlertIcons.default;
+    return <IconComponent {...options} />;
+  };
+
   return (
     <div className="lyon-map-container">
+      <div className="map-controls">
+        <button 
+          className={`add-alert-btn ${isAddingAlert ? 'active' : ''}`} 
+          onClick={toggleAddAlertMode}
+        >
+          {isAddingAlert ? 'Annuler l\'ajout' : 'Ajouter une alerte'}
+        </button>
+        {isAddingAlert && (
+          <div className="add-alert-instructions">
+            Cliquez sur un arrondissement pour ajouter une alerte
+          </div>
+        )}
+      </div>
+      
       <div className="map-interactive">
         <svg 
           className="lyon-map-svg" 
@@ -176,7 +323,7 @@ function LyonMap({ onSelectDistrict, alerts = [] }) {
               <g 
                 key={district.id} 
                 onClick={() => handleDistrictClick(district)}
-                className="district-clickable"
+                className={`district-clickable ${isAddingAlert ? 'adding-alert' : ''}`}
               >
                 <path 
                   d={district.path} 
@@ -198,17 +345,17 @@ function LyonMap({ onSelectDistrict, alerts = [] }) {
                   {district.id}
                 </text>
                 
-                {/* Emojis pour les catastrophes */}
+                {/* Icônes SVG pour les catastrophes */}
                 {districtAlerts.length > 0 && (
-                  <text
-                    x={district.labelPosition[0] + 20}
-                    y={district.labelPosition[1] - 10}
-                    textAnchor="middle"
-                    fontSize="24"
-                    className="alert-emoji"
+                  <foreignObject 
+                    x={district.labelPosition[0] + 5} 
+                    y={district.labelPosition[1] - 30}
+                    width="30" 
+                    height="30"
+                    className="alert-indicator"
                   >
-                    {alertIcons[districtAlerts[0].type] || alertIcons.default}
-                  </text>
+                    {renderAlertIcon(districtAlerts[0].type, { width: 30, height: 30 })}
+                  </foreignObject>
                 )}
               </g>
             );
@@ -246,7 +393,7 @@ function LyonMap({ onSelectDistrict, alerts = [] }) {
       </div>
       
       {/* Affichage des informations du district sélectionné */}
-      {districtInfo && (
+      {districtInfo && !showAlertForm && (
         <div className="district-info-panel">
           <div className="info-header">
             <h3>{districtInfo.id}<sup>{districtInfo.id === 1 ? 'er' : 'ème'}</sup> arrondissement</h3>
@@ -273,9 +420,9 @@ function LyonMap({ onSelectDistrict, alerts = [] }) {
                   .filter(alert => alert.district === districtInfo.id)
                   .map((alert, index) => (
                     <li key={index} className={`alert-item-mini alert-${alert.level}`}>
-                      <span className="alert-emoji-mini">
-                        {alertIcons[alert.type] || alertIcons.default}
-                      </span>
+                      <div className="alert-icon-mini" style={{display: 'inline-block', verticalAlign: 'middle', marginRight: '8px'}}>
+                        {renderAlertIcon(alert.type, { width: 20, height: 20 })}
+                      </div>
                       <span>{alert.description}</span>
                     </li>
                   ))
@@ -286,29 +433,28 @@ function LyonMap({ onSelectDistrict, alerts = [] }) {
         </div>
       )}
       
+      {/* Formulaire d'ajout d'alerte */}
+      {showAlertForm && (
+        <AlertForm 
+          district={selectedDistrict}
+          onSubmit={handleAlertSubmit}
+          onCancel={cancelAlertCreation}
+        />
+      )}
+      
       <div className="map-legend">
         <h4>Légende</h4>
         <div className="legend-section">
           <h5>Types de catastrophes</h5>
           {DISASTER_TYPES.map(disaster => (
             <div key={disaster.type} className="legend-item">
-              <span className="legend-emoji">{alertIcons[disaster.type]}</span>
-              <span>{disaster.label}</span>
+              <div className="legend-icon" style={{display: 'inline-block', width: '24px', marginRight: '20px'}}>
+                {renderAlertIcon(disaster.type)}
+              </div>
+              <span className="legend-text">{disaster.label}</span>
             </div>
           ))}
         </div>
-              
-        {/* <div className="legend-section">
-          <h5>Éléments géographiques</h5>
-          <div className="legend-item">
-            <span className="legend-line" style={{backgroundColor: '#AED6F1'}}></span>
-            <span className="legend-text">Rhône</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-line" style={{backgroundColor: '#85C1E9'}}></span>
-            <span className="legend-text">Saône</span>
-          </div>
-        </div> */}
       </div>
     </div>
   );
