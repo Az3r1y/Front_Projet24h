@@ -47,8 +47,24 @@ const DISTRICTS = [
   { id: 9, name: '9ème' }
 ];
 
+// Utilisateur par défaut pour le cas où l'authentification échoue
+const DEFAULT_USER = {
+  id: 'guest',
+  name: 'Invité',
+  avatar: 'https://avatars.dicebear.com/api/initials/guest.svg'
+};
+
 function ChatPage() {
-  const { user } = useAuth();
+  const auth = useAuth();
+  const user = auth?.user || DEFAULT_USER;
+  
+  // Si l'utilisateur est authentifié mais n'a pas certaines propriétés, les compléter
+  const currentUser = {
+    id: user.id || DEFAULT_USER.id,
+    name: user.name || user.email?.split('@')[0] || DEFAULT_USER.name,
+    avatar: user.avatar || `https://avatars.dicebear.com/api/initials/${user.name || 'guest'}.svg`
+  };
+
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [newMessage, setNewMessage] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState(0);
@@ -74,12 +90,12 @@ function ChatPage() {
     
     const message = {
       id: Date.now(),
-      userId: user.id,
-      username: user.name,
-      avatar: user.avatar,
+      userId: currentUser.id,
+      username: currentUser.name,
+      avatar: currentUser.avatar,
       message: newMessage,
       timestamp: Date.now(),
-      district: selectedDistrict || null
+      district: selectedDistrict > 0 ? selectedDistrict : null
     };
     
     setMessages(prevMessages => [...prevMessages, message]);
@@ -115,7 +131,7 @@ function ChatPage() {
           {filteredMessages.map(msg => (
             <div 
               key={msg.id} 
-              className={`message ${msg.userId === user.id ? 'my-message' : ''} ${msg.userId === 'system' ? 'system-message' : ''}`}
+              className={`message ${msg.userId === currentUser.id ? 'my-message' : ''} ${msg.userId === 'system' ? 'system-message' : ''}`}
             >
               <div className="message-avatar">
                 <img src={msg.avatar} alt={msg.username} />
@@ -161,8 +177,8 @@ function ChatPage() {
           <h3>Utilisateurs en ligne</h3>
           <ul className="user-list">
             <li className="user-item">
-              <img src={user.avatar} alt={user.name} className="user-avatar" />
-              <span className="user-name">{user.name}</span>
+              <img src={currentUser.avatar} alt={currentUser.name} className="user-avatar" />
+              <span className="user-name">{currentUser.name}</span>
               <span className="user-status online"></span>
             </li>
             <li className="user-item">

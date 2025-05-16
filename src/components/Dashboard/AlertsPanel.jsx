@@ -11,16 +11,38 @@ const alertIcons = {
   default: "⚠️"
 };
 
-function AlertsPanel({ alerts, selectedDistrict, onClearFilter }) {
+function AlertsPanel({ alerts, predictions, selectedDistrict, onClearFilter, onSelectPrediction }) {
   const alertLevelClass = (level) => {
     switch (level) {
-      case 'severe': return 'alert-severe';
-      case 'moderate': return 'alert-moderate';
-      case 'light': return 'alert-light';
-      case 'warning': return 'alert-warning';
-      default: return '';
+      case 'severe': 
+      case 'critical': 
+        return 'alert-severe';
+      case 'moderate':
+      case 'danger': 
+        return 'alert-moderate';
+      case 'light':
+      case 'info': 
+        return 'alert-light';
+      case 'warning': 
+        return 'alert-warning';
+      default: 
+        return '';
     }
   };
+
+  // Combiner alertes et prédictions pour affichage
+  const allItems = [
+    ...alerts,
+    ...(predictions || []).map(pred => ({
+      ...pred,
+      isPrediction: true // Marquer comme prédiction pour le style
+    }))
+  ];
+
+  // Filtrer par district si nécessaire
+  const filteredItems = selectedDistrict 
+    ? allItems.filter(item => item.district === selectedDistrict || item.district === null) 
+    : allItems;
 
   return (
     <div className="alerts-panel">
@@ -38,7 +60,7 @@ function AlertsPanel({ alerts, selectedDistrict, onClearFilter }) {
         )}
       </div>
       
-      {alerts.length === 0 ? (
+      {filteredItems.length === 0 ? (
         <p className="no-alerts">
           {selectedDistrict 
             ? `Aucune alerte active dans le ${selectedDistrict}${selectedDistrict === 1 ? 'er' : 'ème'} arrondissement.` 
@@ -46,17 +68,29 @@ function AlertsPanel({ alerts, selectedDistrict, onClearFilter }) {
         </p>
       ) : (
         <ul className="alerts-list">
-          {alerts.map(alert => (
-            <li key={alert.id} className={`alert-item ${alertLevelClass(alert.level)}`}>
+          {filteredItems.map((item, index) => (
+            <li 
+              key={item.id || `pred-${index}`} 
+              className={`alert-item ${alertLevelClass(item.level)} ${item.isPrediction ? 'prediction-item' : ''}`}
+              onClick={() => item.isPrediction && onSelectPrediction && onSelectPrediction(item)}
+            >
               <div className="alert-icon">
-                {alertIcons[alert.type] || alertIcons.default}
+                {alertIcons[item.type] || alertIcons.default}
               </div>
               <div className="alert-content">
                 <div className="alert-header">
-                  <h4>{alert.type.charAt(0).toUpperCase() + alert.type.slice(1)}</h4>
-                  <span className="alert-district">{alert.district}<sup>{alert.district === 1 ? 'er' : 'ème'}</sup></span>
+                  <h4>
+                    {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                    {item.isPrediction && <span className="prediction-badge">Prédiction</span>}
+                  </h4>
+                  <span className="alert-district">{item.district}<sup>{item.district === 1 ? 'er' : 'ème'}</sup></span>
                 </div>
-                <p className="alert-description">{alert.description}</p>
+                <p className="alert-description">{item.description}</p>
+                {item.isPrediction && (
+                  <div className="prediction-actions">
+                    <button className="view-details-btn">Voir détails</button>
+                  </div>
+                )}
               </div>
             </li>
           ))}
@@ -65,6 +99,11 @@ function AlertsPanel({ alerts, selectedDistrict, onClearFilter }) {
       
       <div className="alert-actions">
         <button className="subscribe-btn">S'abonner aux notifications</button>
+        {predictions && predictions.length > 0 && (
+          <span className="predictions-count">
+            {predictions.length} prédiction{predictions.length > 1 ? 's' : ''} disponible{predictions.length > 1 ? 's' : ''}
+          </span>
+        )}
       </div>
     </div>
   );

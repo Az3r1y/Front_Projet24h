@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../../styles/LyonMap.css';
+import PredictionForm from '../Prediction/PredictionForm';
 
 // Données sur les arrondissements de Lyon avec chemins SVG
 const DISTRICTS_DATA = [
@@ -141,13 +142,21 @@ const DISASTER_TYPES = [
   { type: "pollution", label: "Pollution" }
 ];
 
-// Nouveau composant pour le formulaire d'alerte
+// Fonction utilitaire pour générer des ID uniques
+const generateUniqueId = (prefix = '') => {
+  const timestamp = new Date().getTime();
+  const random = Math.floor(Math.random() * 10000);
+  return `${prefix}${timestamp}-${random}`;
+};
+
+// Composant pour le formulaire d'alerte
 function AlertForm({ district, onSubmit, onCancel }) {
   const [alertData, setAlertData] = useState({
     type: 'default',
     description: '',
     level: 'warning' // niveau par défaut
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -156,20 +165,32 @@ function AlertForm({ district, onSubmit, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Éviter les soumissions multiples
+    if (isSubmitting) return false;
+    setIsSubmitting(true);
+    
+    // Désactiver le bouton de soumission
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    
     onSubmit({
       district: district,
       type: alertData.type,
       description: alertData.description,
       level: alertData.level,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      id: generateUniqueId('alert-')
     });
+    
+    return false; // Empêcher la propagation
   };
 
   return (
     <div className="alert-form-container">
       <div className="alert-form-header">
         <h3>Nouvelle alerte - {district}<sup>{district === 1 ? 'er' : 'ème'}</sup> arrondissement</h3>
-        <button className="close-btn" onClick={onCancel}>×</button>
+        <button className="close-btn" onClick={onCancel} type="button">×</button>
       </div>
       <form onSubmit={handleSubmit} className="alert-form">
         <div className="form-group">
@@ -180,6 +201,7 @@ function AlertForm({ district, onSubmit, onCancel }) {
             value={alertData.type} 
             onChange={handleChange}
             required
+            disabled={isSubmitting}
           >
             <option value="default">Choisir un type</option>
             <option value="inondation">Inondation</option>
@@ -200,6 +222,7 @@ function AlertForm({ district, onSubmit, onCancel }) {
             rows="3"
             placeholder="Décrivez l'alerte..."
             required
+            disabled={isSubmitting}
           ></textarea>
         </div>
         
@@ -211,6 +234,7 @@ function AlertForm({ district, onSubmit, onCancel }) {
             value={alertData.level} 
             onChange={handleChange}
             required
+            disabled={isSubmitting}
           >
             <option value="info">Information</option>
             <option value="warning">Avertissement</option>
@@ -220,26 +244,50 @@ function AlertForm({ district, onSubmit, onCancel }) {
         </div>
         
         <div className="form-actions">
-          <button type="button" className="cancel-btn" onClick={onCancel}>Annuler</button>
-          <button type="submit" className="submit-btn">Créer l'alerte</button>
+          <button 
+            type="button" 
+            className="cancel-btn" 
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
+            Annuler
+          </button>
+          <button 
+            type="submit" 
+            className="submit-btn"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Création en cours...' : 'Créer l\'alerte'}
+          </button>
         </div>
       </form>
     </div>
   );
 }
 
-function LyonMap({ onSelectDistrict, alerts = [], onAddAlert }) {
+function LyonMap({ onSelectDistrict, alerts = [], predictions = [], onAddAlert }) {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [districtInfo, setDistrictInfo] = useState(null);
   const [isAddingAlert, setIsAddingAlert] = useState(false);
   const [showAlertForm, setShowAlertForm] = useState(false);
+  const [showPredictionForm, setShowPredictionForm] = useState(false);
+  const [isPredicting, setIsPredicting] = useState(false);
 
+  // Combinez les alertes et prédictions pour l'affichage
+  const allAlerts = Array.isArray(alerts) ? alerts : [];
+  
   // Fonction pour gérer le clic sur un arrondissement
   const handleDistrictClick = (district) => {
     if (isAddingAlert) {
       // Si en mode ajout d'alerte, afficher le formulaire d'alerte
       setSelectedDistrict(district.id);
       setShowAlertForm(true);
+      setShowPredictionForm(false);
+    } else if (isPredicting) {
+      // Si en mode prédiction, afficher le formulaire de prédiction
+      setSelectedDistrict(district.id);
+      setShowPredictionForm(true);
+      setShowAlertForm(false);
     } else {
       // Comportement normal
       setSelectedDistrict(district.id);
@@ -260,27 +308,72 @@ function LyonMap({ onSelectDistrict, alerts = [], onAddAlert }) {
 
   const toggleAddAlertMode = () => {
     setIsAddingAlert(!isAddingAlert);
-    // Si on quitte le mode ajout, fermer le formulaire s'il est ouvert
+    setIsPredicting(false);
+    // Si on quitte le mode ajout, fermer les formulaires s'ils sont ouverts
     if (isAddingAlert) {
       setShowAlertForm(false);
     }
   };
 
+  const togglePredictionMode = () => {
+    setIsPredicting(!isPredicting);
+    setIsAddingAlert(false);
+    // Si on quitte le mode prédiction, fermer les formulaires s'ils sont ouverts
+    if (isPredicting) {
+      setShowPredictionForm(false);
+    }
+  };
+
   const handleAlertSubmit = (newAlert) => {
+    const enrichedAlert = {
+      ...newAlert,
+      isPrediction: false // Marquer explicitement comme alerte réelle
+    };
+    
     if (onAddAlert) {
-      onAddAlert(newAlert);
+      onAddAlert(enrichedAlert);
     }
     setShowAlertForm(false);
     setIsAddingAlert(false);
+    
+    // Empêcher la propagation d'événements supplémentaires
+    return false;
   };
 
-  const cancelAlertCreation = () => {
+  const handlePredictionSubmit = (predictionResult) => {
+    const enrichedPrediction = {
+      ...predictionResult,
+      isPrediction: true, // Marquer explicitement comme prédiction
+      id: predictionResult.id || generateUniqueId('pred-') // Ajouter un ID unique si non présent
+    };
+    
+    if (onAddAlert) {
+      onAddAlert(enrichedPrediction);
+    }
+    setShowPredictionForm(false);
+    setIsPredicting(false);
+    
+    // Empêcher la propagation d'événements supplémentaires
+    return false;
+  };
+
+  const cancelFormDisplay = () => {
     setShowAlertForm(false);
+    setShowPredictionForm(false);
   };
 
   // Récupère les alertes pour un arrondissement donné
   const getDistrictAlerts = (districtId) => {
-    return alerts.filter(alert => alert.district === districtId);
+    // Filtrer les alertes pour ce district
+    const districtAlerts = allAlerts.filter(alert => alert.district === districtId);
+    
+    // Utiliser Map pour dédupliquer par ID
+    const uniqueAlertsMap = new Map();
+    districtAlerts.forEach(alert => {
+      uniqueAlertsMap.set(alert.id, alert);
+    });
+    
+    return Array.from(uniqueAlertsMap.values());
   };
 
   // Rendu d'une icône d'alerte
@@ -298,9 +391,23 @@ function LyonMap({ onSelectDistrict, alerts = [], onAddAlert }) {
         >
           {isAddingAlert ? 'Annuler l\'ajout' : 'Ajouter une alerte'}
         </button>
+
+        <button 
+          className={`predict-btn ${isPredicting ? 'active' : ''}`} 
+          onClick={togglePredictionMode}
+        >
+          {isPredicting ? 'Annuler la prédiction' : 'Faire une prédiction'}
+        </button>
+
         {isAddingAlert && (
           <div className="add-alert-instructions">
             Cliquez sur un arrondissement pour ajouter une alerte
+          </div>
+        )}
+
+        {isPredicting && (
+          <div className="prediction-instructions">
+            Cliquez sur un arrondissement pour faire une prédiction
           </div>
         )}
       </div>
@@ -323,7 +430,7 @@ function LyonMap({ onSelectDistrict, alerts = [], onAddAlert }) {
               <g 
                 key={district.id} 
                 onClick={() => handleDistrictClick(district)}
-                className={`district-clickable ${isAddingAlert ? 'adding-alert' : ''}`}
+                className={`district-clickable ${isAddingAlert ? 'adding-alert' : ''} ${isPredicting ? 'predicting' : ''}`}
               >
                 <path 
                   d={district.path} 
@@ -345,17 +452,53 @@ function LyonMap({ onSelectDistrict, alerts = [], onAddAlert }) {
                   {district.id}
                 </text>
                 
-                {/* Icônes SVG pour les catastrophes */}
+                {/* Icônes SVG pour les alertes et prédictions */}
                 {districtAlerts.length > 0 && (
-                  <foreignObject 
-                    x={district.labelPosition[0] + 5} 
-                    y={district.labelPosition[1] - 30}
-                    width="30" 
-                    height="30"
-                    className="alert-indicator"
-                  >
-                    {renderAlertIcon(districtAlerts[0].type, { width: 30, height: 30 })}
-                  </foreignObject>
+                  <>
+                    {/* Première icône d'alerte */}
+                    <foreignObject 
+                      x={district.labelPosition[0] - 15} 
+                      y={district.labelPosition[1] - 30}
+                      width="30" 
+                      height="30"
+                      className="alert-indicator"
+                    >
+                      {renderAlertIcon(districtAlerts[0].type, { width: 30, height: 30 })}
+                    </foreignObject>
+                    
+                    {/* Badge pour indiquer s'il y a plusieurs alertes */}
+                    {districtAlerts.length > 1 && (
+                      <g>
+                        <circle 
+                          cx={district.labelPosition[0] + 15} 
+                          cy={district.labelPosition[1] - 15}
+                          r="10" 
+                          fill="#e74c3c" 
+                        />
+                        <text 
+                          x={district.labelPosition[0] + 15} 
+                          y={district.labelPosition[1] - 11}
+                          textAnchor="middle" 
+                          fill="white" 
+                          fontSize="12"
+                          fontWeight="bold"
+                        >
+                          {districtAlerts.length}
+                        </text>
+                      </g>
+                    )}
+                    
+                    {/* Indicateur pour les prédictions */}
+                    {districtAlerts.some(alert => alert.isPrediction) && (
+                      <circle 
+                        cx={district.labelPosition[0] - 15} 
+                        cy={district.labelPosition[1] - 15}
+                        r="5" 
+                        fill="#8e44ad"
+                        className="prediction-indicator pulsing" 
+                      />
+                    )}
+                  </>
                 )}
               </g>
             );
@@ -364,7 +507,7 @@ function LyonMap({ onSelectDistrict, alerts = [], onAddAlert }) {
           {/* Dessiner les rivières au-dessus des arrondissements */}
           {RIVERS_DATA.map((river, index) => (
             <path 
-              key={river.name}
+              key={river.name || index}
               d={river.path}
               fill="none"
               stroke={river.color}
@@ -393,7 +536,7 @@ function LyonMap({ onSelectDistrict, alerts = [], onAddAlert }) {
       </div>
       
       {/* Affichage des informations du district sélectionné */}
-      {districtInfo && !showAlertForm && (
+      {districtInfo && !showAlertForm && !showPredictionForm && (
         <div className="district-info-panel">
           <div className="info-header">
             <h3>{districtInfo.id}<sup>{districtInfo.id === 1 ? 'er' : 'ème'}</sup> arrondissement</h3>
@@ -412,18 +555,19 @@ function LyonMap({ onSelectDistrict, alerts = [], onAddAlert }) {
             </div>
           </div>
           
-          {alerts.filter(alert => alert.district === districtInfo.id).length > 0 && (
+          {allAlerts.filter(alert => alert.district === districtInfo.id).length > 0 && (
             <div className="district-alerts">
               <h4>Alertes actuelles:</h4>
               <ul>
-                {alerts
+                {allAlerts
                   .filter(alert => alert.district === districtInfo.id)
                   .map((alert, index) => (
-                    <li key={index} className={`alert-item-mini alert-${alert.level}`}>
+                    <li key={alert.id || index} className={`alert-item-mini alert-${alert.level} ${alert.isPrediction ? 'is-prediction' : ''}`}>
                       <div className="alert-icon-mini" style={{display: 'inline-block', verticalAlign: 'middle', marginRight: '8px'}}>
                         {renderAlertIcon(alert.type, { width: 20, height: 20 })}
                       </div>
                       <span>{alert.description}</span>
+                      {alert.isPrediction && <span className="prediction-badge"> (prédiction)</span>}
                     </li>
                   ))
                 }
@@ -438,7 +582,16 @@ function LyonMap({ onSelectDistrict, alerts = [], onAddAlert }) {
         <AlertForm 
           district={selectedDistrict}
           onSubmit={handleAlertSubmit}
-          onCancel={cancelAlertCreation}
+          onCancel={cancelFormDisplay}
+        />
+      )}
+      
+      {/* Formulaire de prédiction */}
+      {showPredictionForm && (
+        <PredictionForm 
+          district={selectedDistrict}
+          onSubmit={handlePredictionSubmit}
+          onCancel={cancelFormDisplay}
         />
       )}
       
@@ -454,6 +607,16 @@ function LyonMap({ onSelectDistrict, alerts = [], onAddAlert }) {
               <span className="legend-text">{disaster.label}</span>
             </div>
           ))}
+        </div>
+        <div className="legend-section">
+          <div className="legend-item">
+            <span className="legend-color normal-alert"></span>
+            <span>Alerte réelle</span>
+          </div>
+          <div className="legend-item">
+            <span className="legend-color prediction-alert"></span>
+            <span>Prédiction</span>
+          </div>
         </div>
       </div>
     </div>

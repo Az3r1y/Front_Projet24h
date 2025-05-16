@@ -366,3 +366,38 @@
   border-left: 4px solid #8e44ad;
   background-color: rgba(142, 68, 173, 0.1);
 }
+
+/* Ajoutez ces styles à votre fichier CSS existant */
+
+.predict-btn {
+  padding: 8px 16px;
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin-left: 10px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.predict-btn.active {
+  background-color: #e74c3c;
+}
+
+.predict-btn:hover {
+  background-color: #3498db;
+}
+
+.predict-btn.active:hover {
+  background-color: #c0392b;
+}
+
+.prediction-instructions {
+  font-size: 14px;
+  color: #2980b9;
+  margin-left: 16px;
+}
+
+.alert-item-mini.is-prediction {
+  border-left: 4px solid #9b59b6;
+}
